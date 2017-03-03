@@ -1,2 +1,39 @@
 ---
-# tasks file for egjiri.newrelic
+- name: fail if there is not newrelic license key
+  fail:
+    msg: "The NewRelic License Key (var: newrelic.infrastructure_license_key) is missing!"
+  when: "{{newrelic.infrastructure_license_key == ''}}"
+
+- name: setup newrelic-infra config
+  become: True
+  template:
+    src: newrelic-infra.yml.j2
+    dest: /etc/newrelic-infra.yml
+  notify: restart newrelic-infra
+
+- name: add newrelic-infra apt key
+  become: True
+  apt_key:
+    data: "{{ lookup('file', '../files/newrelic-infra-apt-key') }}"
+    state: present
+
+- name: gather facts to have access to ansible_distribution_release
+  setup:
+  when: ansible_distribution_release is undefined
+
+- name: add newrelic-infra apt repository
+  become: True
+  apt_repository:
+    repo: deb [arch=amd64] http://download.newrelic.com/infrastructure_agent/linux/apt {{ansible_distribution_release}} main
+    update_cache: True
+
+- name: install newrelic-infra agent
+  become: True
+  apt:
+    name: newrelic-infra
+
+- name: setup newrelic-infra service
+  service:
+    name: newrelic-infra
+    state: started
+    enabled: True

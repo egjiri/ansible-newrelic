@@ -1,2 +1,6 @@
 ---
-# handlers file for egjiri.newrelic
+- name: restart newrelic-infra
+  become: True
+  service:
+    name: newrelic-infra
+    state: restarted
