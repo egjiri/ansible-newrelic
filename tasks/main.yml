@@ -2,7 +2,7 @@
 - name: fail if there is not newrelic license key
   fail:
     msg: "The NewRelic License Key (var: newrelic.infrastructure_license_key) is missing!"
-  when: "{{newrelic.infrastructure_license_key == ''}}"
+  when: newrelic.infrastructure_license_key == ''
 
 - name: setup newrelic-infra config
   become: True
@@ -14,7 +14,7 @@
 - name: add newrelic-infra apt key
   become: True
   apt_key:
-    data: "{{ lookup('file', '../files/newrelic-infra-apt-key') }}"
+    data: "{{lookup('file', '../files/newrelic-infra-apt-key')}}"
     state: present
 
 - name: gather facts to have access to ansible_distribution_release
